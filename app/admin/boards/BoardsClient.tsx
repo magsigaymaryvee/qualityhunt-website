@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import type { Board } from "@/lib/types";
 import { fetchJson } from "@/lib/fetch-json";
 import ImageUploadField from "@/app/admin/ImageUploadField";
@@ -40,6 +41,10 @@ function toDraft(board: Board): BoardDraft {
 }
 
 export default function BoardsClient() {
+  const searchParams = useSearchParams();
+  // Deep link from the Dashboard's edit icon (e.g. /admin/boards?edit=<id>)
+  // — cleared once acted on so it doesn't re-trigger on a later refresh.
+  const [pendingEditId, setPendingEditId] = useState(searchParams.get("edit"));
   const [boards, setBoards] = useState<Board[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [newDraft, setNewDraft] = useState<BoardDraft>(emptyDraft);
@@ -64,6 +69,21 @@ export default function BoardsClient() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, []);
+
+  // Once the boards list has loaded, honor a pending ?edit= deep link by
+  // opening that board's form — same as clicking its Edit button here. This
+  // only runs once (pendingEditId is cleared immediately after), so it
+  // can't cascade on a later refresh.
+  useEffect(() => {
+    if (!pendingEditId || !boards) return;
+    const board = boards.find((b) => b.id === pendingEditId);
+    if (board) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEditingId(board.id);
+      setEditDraft(toDraft(board));
+    }
+    setPendingEditId(null);
+  }, [pendingEditId, boards]);
 
   // Editing a board opens its edit form inline, in place, further down the
   // "Existing boards" list — without this it can open off-screen below the

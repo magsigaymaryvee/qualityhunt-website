@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { isAdminSession } from "@/lib/admin-auth";
 import AdminShell from "@/app/admin/AdminShell";
@@ -10,7 +11,11 @@ export default async function AdminBoardsPage() {
 
   return (
     <AdminShell current="boards" title="Boards">
-      <BoardsClient />
+      {/* useSearchParams (for the ?edit= deep link from the Dashboard)
+          needs a Suspense boundary. */}
+      <Suspense fallback={<p className="text-sm text-taupe">Loading…</p>}>
+        <BoardsClient />
+      </Suspense>
     </AdminShell>
   );
 }

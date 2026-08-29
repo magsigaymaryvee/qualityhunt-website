@@ -50,7 +50,7 @@ export default function BoardRowActions({ board }: { board: Board }) {
         {board.published ? <EyeIcon /> : <EyeOffIcon />}
       </button>
       <Link
-        href="/admin/boards"
+        href={`/admin/boards?edit=${board.id}`}
         aria-label={`Edit ${board.title}`}
         className="flex h-8 w-8 items-center justify-center rounded-full text-ink-soft transition hover:bg-paper hover:text-oxblood"
       >
