@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { site } from "@/lib/site";
 
 export default function SiteFooter() {
@@ -8,12 +9,23 @@ export default function SiteFooter() {
           © {new Date().getFullYear()} {site.name}
         </span>
         <span className="max-w-md">{site.affiliateDisclosure}</span>
-        <a
-          href={`mailto:${site.contactEmail}`}
-          className="inline-flex min-h-11 items-center hover:text-oxblood sm:min-h-0"
-        >
-          {site.contactEmail}
-        </a>
+        <div className="flex items-center gap-4">
+          <a
+            href={`mailto:${site.contactEmail}`}
+            className="inline-flex min-h-11 items-center hover:text-oxblood sm:min-h-0"
+          >
+            {site.contactEmail}
+          </a>
+          {/* Only navigation to /admin from inside the installed app (it has
+              no address bar) — the passcode + rate limiting behind it is the
+              real protection, not hiding the link. */}
+          <Link
+            href="/admin"
+            className="inline-flex min-h-11 items-center hover:text-oxblood sm:min-h-0"
+          >
+            Admin
+          </Link>
+        </div>
       </div>
     </footer>
   );
