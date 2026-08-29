@@ -5,10 +5,12 @@ import SiteFooter from "@/app/components/SiteFooter";
 import MediaCarousel from "@/app/components/MediaCarousel";
 import CoverVideo from "@/app/components/CoverVideo";
 import ShareButton from "@/app/components/ShareButton";
+import BuyButton from "@/app/components/BuyButton";
+import ReviewForm from "@/app/components/ReviewForm";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { site } from "@/lib/site";
 import { parseVideoUrl } from "@/lib/video-embed";
-import type { Board, Product, ProductMedia } from "@/lib/types";
+import type { Board, Product, ProductMedia, Review } from "@/lib/types";
 import type { Metadata } from "next";
 
 // Explicit, not relied-upon-by-default: a product's page (and its
@@ -22,7 +24,7 @@ async function getProduct(slug: string): Promise<Product | null> {
     const { data, error } = await supabase
       .from("products")
       .select(
-        "id, board_id, slug, tagline, name, description, image_url, buy_url, video_url, notes, reviews_url, position, publish_at"
+        "id, board_id, slug, tagline, name, description, image_url, buy_url, video_url, notes, reviews_url, position, publish_at, click_count"
       )
       .eq("slug", slug)
       // Excludes drafts (publish_at is null, which never satisfies <=) and
@@ -53,6 +55,27 @@ async function getMedia(productId: string): Promise<ProductMedia[]> {
 
     if (error) {
       console.error("Failed to load product media:", error);
+      return [];
+    }
+    return data ?? [];
+  } catch (err) {
+    console.error("Supabase not configured:", err);
+    return [];
+  }
+}
+
+async function getApprovedReviews(productId: string): Promise<Review[]> {
+  try {
+    const supabase = getSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("id, product_id, name, rating, body, approved, created_at")
+      .eq("product_id", productId)
+      .eq("approved", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Failed to load reviews:", error);
       return [];
     }
     return data ?? [];
@@ -108,6 +131,7 @@ export default async function ProductPage({
 
   const video = product.video_url ? parseVideoUrl(product.video_url) : null;
   const media = await getMedia(product.id);
+  const reviews = await getApprovedReviews(product.id);
 
   return (
     <>
@@ -170,14 +194,13 @@ export default async function ProductPage({
 
               {/* Desktop buy panel — the phone gets the sticky bar below instead. */}
               {product.buy_url && (
-                <a
+                <BuyButton
                   href={product.buy_url}
-                  target="_blank"
-                  rel="noopener sponsored"
+                  productId={product.id}
                   className="hidden min-h-14 items-center justify-center rounded-full bg-forest px-6 text-base font-semibold text-on-forest transition hover:opacity-90 lg:inline-flex"
                 >
                   Shop this
-                </a>
+                </BuyButton>
               )}
               {product.reviews_url && (
                 <a
@@ -213,20 +236,49 @@ export default async function ProductPage({
               </div>
             </div>
           )}
+
+          <div className="mt-10 flex flex-col gap-4 px-4 sm:px-0 lg:mt-14">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-taupe">
+              Reviews
+            </p>
+            {reviews.length === 0 ? (
+              <p className="text-sm text-ink-soft">No reviews yet — be the first.</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {reviews.map((review) => (
+                  <div
+                    key={review.id}
+                    className="rounded-2xl bg-paper-2 p-4 shadow-[0_2px_8px_rgba(23,21,15,0.05)] sm:p-5"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold">{review.name || "Anonymous"}</p>
+                      <p aria-label={`${review.rating} out of 5 stars`} className="text-oxblood">
+                        {"★".repeat(review.rating)}
+                        <span className="text-line">{"★".repeat(5 - review.rating)}</span>
+                      </p>
+                    </div>
+                    <p className="mt-2 max-w-prose text-[13px] leading-6 text-ink-soft sm:text-sm">
+                      {review.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+            <ReviewForm productId={product.id} />
+          </div>
         </section>
       </main>
 
       {/* Sticky buy bar — phones and tablets only. */}
       {product.buy_url && (
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-paper/96 px-4 pb-4 pt-3 backdrop-blur-sm lg:hidden">
-          <a
+          <BuyButton
             href={product.buy_url}
-            target="_blank"
-            rel="noopener sponsored"
+            productId={product.id}
             className="flex min-h-13 items-center justify-center rounded-full bg-forest text-[15px] font-semibold text-on-forest"
           >
             Shop this
-          </a>
+          </BuyButton>
           <p className="mt-1.5 text-center text-[10px] leading-4 text-taupe">
             {site.affiliateDisclosure}
           </p>

@@ -24,6 +24,21 @@ export type Product = {
   position: number;
   // NULL = draft (never shown), a future time = scheduled, now/past = live.
   publish_at: string | null;
+  // How many times the "Shop this" link has been clicked. Admin-only stat —
+  // never shown to visitors.
+  click_count: number;
+};
+
+export type Review = {
+  id: string;
+  product_id: string;
+  name: string;
+  rating: number;
+  body: string;
+  // Visitor-submitted reviews sit here unapproved until an admin reviews
+  // them — see supabase/migrations/0012_reviews.sql.
+  approved: boolean;
+  created_at: string;
 };
 
 export type MediaType = "image" | "video";

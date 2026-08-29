@@ -647,6 +647,8 @@ export default function ProductsClient() {
                       </p>
                       <p className="truncate font-sans text-xs text-taupe">
                         /products/{product.slug}
+                        {" · "}
+                        {product.click_count} click{product.click_count === 1 ? "" : "s"}
                       </p>
                     </div>
                   </div>

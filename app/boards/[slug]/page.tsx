@@ -40,7 +40,7 @@ async function getProducts(boardId: string): Promise<Product[]> {
     const { data, error } = await supabase
       .from("products")
       .select(
-        "id, board_id, slug, tagline, name, description, image_url, buy_url, video_url, notes, reviews_url, position, publish_at"
+        "id, board_id, slug, tagline, name, description, image_url, buy_url, video_url, notes, reviews_url, position, publish_at, click_count"
       )
       .eq("board_id", boardId)
       // Excludes drafts (publish_at is null, which never satisfies <=) and

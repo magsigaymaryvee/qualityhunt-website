@@ -28,6 +28,38 @@ async function getBoards(): Promise<Board[]> {
   }
 }
 
+type Stats = { products: number; clicks: number; pendingReviews: number };
+
+// A small "Overall performance" summary, in the spirit of Pinterest's own
+// analytics overview — just scoped to what this site actually tracks
+// (there's no impressions/audience data without Pinterest's own reach).
+async function getStats(): Promise<Stats> {
+  try {
+    const supabase = getSupabaseServerClient();
+    const [productsResult, pendingReviewsResult] = await Promise.all([
+      supabase.from("products").select("click_count"),
+      supabase.from("reviews").select("id", { count: "exact", head: true }).eq("approved", false),
+    ]);
+
+    if (productsResult.error) {
+      console.error("Failed to load product stats:", productsResult.error);
+    }
+    if (pendingReviewsResult.error) {
+      console.error("Failed to load review stats:", pendingReviewsResult.error);
+    }
+
+    const products = productsResult.data ?? [];
+    return {
+      products: products.length,
+      clicks: products.reduce((sum, p) => sum + (p.click_count ?? 0), 0),
+      pendingReviews: pendingReviewsResult.count ?? 0,
+    };
+  } catch (err) {
+    console.error("Supabase not configured:", err);
+    return { products: 0, clicks: 0, pendingReviews: 0 };
+  }
+}
+
 export default async function AdminPage() {
   const signedIn = await isAdminSession();
 
@@ -48,10 +80,26 @@ export default async function AdminPage() {
   }
 
   const boards = await getBoards();
+  const stats = await getStats();
 
   return (
     <AdminShell current="dashboard" title="Dashboard">
       <div className="flex flex-col gap-5">
+        <div className="rounded-2xl bg-paper-2 p-5 shadow-[0_2px_8px_rgba(23,21,15,0.05)] sm:p-6">
+          <h2 className="font-serif text-xl text-ink">Overall performance</h2>
+          <p className="mt-1 text-xs text-taupe">Updated in real time.</p>
+          <div className="mt-5 grid grid-cols-2 gap-5 sm:grid-cols-4">
+            <Stat label="Boards" value={boards.length} />
+            <Stat label="Products" value={stats.products} />
+            <Stat label="Outbound clicks" value={stats.clicks} />
+            <Stat
+              label="Reviews to approve"
+              value={stats.pendingReviews}
+              href="/admin/reviews"
+            />
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Link
             href="/admin/boards"
@@ -127,4 +175,24 @@ export default async function AdminPage() {
       </div>
     </AdminShell>
   );
+}
+
+function Stat({ label, value, href }: { label: string; value: number; href?: string }) {
+  const content = (
+    <>
+      <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.08em] text-taupe">
+        {label}
+      </p>
+      <p className="mt-1 font-serif text-3xl text-ink">{value.toLocaleString()}</p>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className="block rounded-lg transition hover:opacity-70">
+        {content}
+      </Link>
+    );
+  }
+  return <div>{content}</div>;
 }

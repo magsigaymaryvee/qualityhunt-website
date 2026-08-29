@@ -4,7 +4,7 @@ import { uniqueSlug } from "@/lib/slug-server";
 import { configErrorResponse } from "@/lib/api-error";
 
 const SELECT =
-  "id, board_id, slug, tagline, name, description, image_url, buy_url, video_url, notes, reviews_url, position, publish_at";
+  "id, board_id, slug, tagline, name, description, image_url, buy_url, video_url, notes, reviews_url, position, publish_at, click_count";
 
 type Params = { id: string };
 

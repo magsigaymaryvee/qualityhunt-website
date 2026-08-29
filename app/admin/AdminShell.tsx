@@ -2,12 +2,13 @@ import Link from "next/link";
 import LogoutButton from "@/app/admin/LogoutButton";
 import { site } from "@/lib/site";
 
-type Tab = "dashboard" | "boards" | "products";
+type Tab = "dashboard" | "boards" | "products" | "reviews";
 
 const tabs: { key: Tab; label: string; href: string; glyph: string }[] = [
   { key: "dashboard", label: "Home", href: "/admin", glyph: "▦" },
   { key: "boards", label: "Boards", href: "/admin/boards", glyph: "▣" },
   { key: "products", label: "Products", href: "/admin/products", glyph: "▤" },
+  { key: "reviews", label: "Reviews", href: "/admin/reviews", glyph: "★" },
 ];
 
 /**
