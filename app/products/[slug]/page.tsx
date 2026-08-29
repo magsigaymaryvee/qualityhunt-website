@@ -7,6 +7,7 @@ import CoverVideo from "@/app/components/CoverVideo";
 import ShareButton from "@/app/components/ShareButton";
 import BuyButton from "@/app/components/BuyButton";
 import ReviewForm from "@/app/components/ReviewForm";
+import FormattedText from "@/app/components/FormattedText";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { site } from "@/lib/site";
 import { parseVideoUrl } from "@/lib/video-embed";
@@ -176,8 +177,8 @@ export default async function ProductPage({
                 {product.name}
               </h1>
               {product.description && (
-                <p className="max-w-prose text-sm leading-7 text-ink-soft sm:text-base">
-                  {product.description}
+                <p className="max-w-prose whitespace-pre-wrap text-sm leading-7 text-ink-soft sm:text-base">
+                  <FormattedText text={product.description} />
                 </p>
               )}
 

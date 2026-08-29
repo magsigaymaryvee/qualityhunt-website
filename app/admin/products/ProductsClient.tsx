@@ -10,6 +10,7 @@ import NewProductMediaEditor, {
   type StagedMedia,
 } from "@/app/admin/products/NewProductMediaEditor";
 import ConfirmButton from "@/app/admin/ConfirmButton";
+import BoldableTextarea from "@/app/admin/BoldableTextarea";
 import { isLikelyValidUrl } from "@/lib/url-check";
 
 type PublishMode = "now" | "draft" | "schedule";
@@ -375,12 +376,12 @@ export default function ProductsClient() {
               />
             </BoxField>
             <BoxField label="Description">
-              <textarea
+              <BoldableTextarea
                 value={newDraft.description}
-                onChange={(e) => setNewDraft({ ...newDraft, description: e.target.value })}
+                onChange={(description) => setNewDraft({ ...newDraft, description })}
                 className={boxedInputClass}
                 placeholder="Describe your pin"
-                rows={2}
+                rows={6}
               />
             </BoxField>
             <BoxField label="Buy / affiliate link">
@@ -540,13 +541,13 @@ export default function ProductsClient() {
                         />
                       </BoxField>
                       <BoxField label="Description">
-                        <textarea
+                        <BoldableTextarea
                           value={editDraft.description}
-                          onChange={(e) =>
-                            setEditDraft({ ...editDraft, description: e.target.value })
+                          onChange={(description) =>
+                            setEditDraft({ ...editDraft, description })
                           }
                           className={boxedInputClass}
-                          rows={2}
+                          rows={6}
                         />
                       </BoxField>
                       <BoxField label="Buy / affiliate link">
