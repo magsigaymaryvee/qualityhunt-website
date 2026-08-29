@@ -21,13 +21,22 @@ export async function POST(request: Request) {
 
   try {
     const supabase = getSupabaseServerClient();
-    const { error } = await supabase.rpc("increment_product_click", {
-      p_product_id: product_id,
-    });
+    const [{ error: rpcError }, { error: logError }] = await Promise.all([
+      supabase.rpc("increment_product_click", { p_product_id: product_id }),
+      // Individually timestamped, unlike the running total above — this is
+      // what lets the admin's outbound-clicks graph show a trend instead of
+      // just a single ever-growing number.
+      supabase.from("product_clicks").insert({ product_id }),
+    ]);
 
-    if (error) {
-      console.error("Failed to record click:", error);
+    if (rpcError) {
+      console.error("Failed to record click:", rpcError);
       return Response.json({ error: "Failed to record click." }, { status: 500 });
+    }
+    if (logError) {
+      // The counter above already succeeded — don't fail the whole request
+      // over the graph's log entry, just note it.
+      console.error("Failed to log click for graph:", logError);
     }
 
     return Response.json({ ok: true });

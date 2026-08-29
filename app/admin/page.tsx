@@ -6,6 +6,7 @@ import { site } from "@/lib/site";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import type { Board } from "@/lib/types";
 import BoardRowActions from "@/app/admin/BoardRowActions";
+import ClicksOverview from "@/app/admin/ClicksOverview";
 
 export const metadata = { title: "Admin" };
 
@@ -99,6 +100,8 @@ export default async function AdminPage() {
             />
           </div>
         </div>
+
+        <ClicksOverview boards={boards} />
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Link
