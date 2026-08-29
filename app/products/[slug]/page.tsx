@@ -11,6 +11,11 @@ import { parseVideoUrl } from "@/lib/video-embed";
 import type { Board, Product, ProductMedia } from "@/lib/types";
 import type { Metadata } from "next";
 
+// Explicit, not relied-upon-by-default: a product's page (and its
+// publish/schedule status) should always reflect the current database,
+// never a stale prerendered copy from an earlier deploy.
+export const dynamic = "force-dynamic";
+
 async function getProduct(slug: string): Promise<Product | null> {
   try {
     const supabase = getSupabaseServerClient();

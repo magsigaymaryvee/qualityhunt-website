@@ -5,6 +5,14 @@ import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { site } from "@/lib/site";
 import type { Board } from "@/lib/types";
 
+// Without this, Next.js prerenders the homepage once at deploy time and
+// serves that same frozen board list to everyone until the next deploy —
+// so adding, hiding, or deleting a board in the admin would silently not
+// show up on the live site until a redeploy. This page has no dynamic
+// segments (unlike /boards/[slug]), so it would otherwise default to
+// exactly that kind of static caching.
+export const dynamic = "force-dynamic";
+
 async function getPublishedBoards(): Promise<Board[]> {
   try {
     const supabase = getSupabaseServerClient();

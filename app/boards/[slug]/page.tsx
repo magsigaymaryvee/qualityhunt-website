@@ -7,6 +7,11 @@ import { getSupabaseServerClient } from "@/lib/supabase-server";
 import type { Board, Product } from "@/lib/types";
 import type { Metadata } from "next";
 
+// Explicit, not relied-upon-by-default: makes sure a board's product list
+// always reflects the latest admin changes rather than a stale prerendered
+// copy, regardless of how this route's caching behavior might change later.
+export const dynamic = "force-dynamic";
+
 async function getBoard(slug: string): Promise<Board | null> {
   try {
     const supabase = getSupabaseServerClient();

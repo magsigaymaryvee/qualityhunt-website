@@ -2,6 +2,11 @@ import type { MetadataRoute } from "next";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { site } from "@/lib/site";
 
+// Otherwise this gets frozen at build time too, same issue as the
+// homepage — new boards/products wouldn't reach search engines until the
+// next deploy.
+export const dynamic = "force-dynamic";
+
 // Same visibility rules as the public pages themselves: only published
 // boards, and only products whose publish_at has actually arrived — a
 // draft or still-scheduled item shouldn't be handed to search engines
