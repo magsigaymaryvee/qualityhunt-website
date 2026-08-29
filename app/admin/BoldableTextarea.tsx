@@ -10,12 +10,14 @@ import { useRef } from "react";
 export default function BoldableTextarea({
   value,
   onChange,
+  onBlur,
   className,
   placeholder,
   rows,
 }: {
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   className: string;
   placeholder?: string;
   rows?: number;
@@ -57,6 +59,7 @@ export default function BoldableTextarea({
         ref={ref}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
         className={className}
         placeholder={placeholder}
         rows={rows}

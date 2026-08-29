@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ProductMedia } from "@/lib/types";
 import CoverVideo from "@/app/components/CoverVideo";
 import ShareButton from "@/app/components/ShareButton";
+import FormattedText from "@/app/components/FormattedText";
 
 // One fixed frame for every carousel item, photo or video. Letting photos
 // keep 2:3 and videos keep 9:16 in the same row made the carousel look
@@ -234,7 +235,7 @@ function SeeMoreText({ text }: { text: string }) {
             : "line-clamp-4 text-sm leading-6 text-ink-soft"
         }
       >
-        {text}
+        <FormattedText text={text} />
       </p>
       {!expanded && (
         <button

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { fetchJson } from "@/lib/fetch-json";
 import { isLikelyValidUrl } from "@/lib/url-check";
 import ConfirmButton from "@/app/admin/ConfirmButton";
+import MediaCaptionField from "@/app/admin/MediaCaptionField";
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
@@ -233,12 +234,9 @@ export default function NewProductMediaEditor({
                   placeholder="Title (shown under the thumbnail)"
                   className="rounded-sm border border-line bg-paper px-2 py-1 font-sans text-xs outline-none focus:border-oxblood"
                 />
-                <textarea
-                  defaultValue={item.caption}
-                  onBlur={(e) => {
-                    if (e.target.value !== item.caption)
-                      setField(item.localId, "caption", e.target.value);
-                  }}
+                <MediaCaptionField
+                  initialValue={item.caption}
+                  onSave={(value) => setField(item.localId, "caption", value)}
                   placeholder="Description / styling tip (behind the More button)"
                   rows={2}
                   className="rounded-sm border border-line bg-paper px-2 py-1 font-sans text-xs outline-none focus:border-oxblood"
