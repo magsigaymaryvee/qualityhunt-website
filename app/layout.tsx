@@ -22,6 +22,12 @@ export const metadata: Metadata = {
     template: `%s · ${site.name}`,
   },
   description: site.tagline,
+  // Proves domain ownership to Pinterest (Settings → Claim your website) —
+  // safe to leave in permanently, it's a one-way "yes, this is my site"
+  // signal, not a credential.
+  other: {
+    "p:domain_verify": "48ffdd5d70cc32ada98265c3cad4151f",
+  },
 };
 
 export const viewport = {
