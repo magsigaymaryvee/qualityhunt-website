@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Quality Hunt</string>
+    <string name="title_activity_main">Quality Hunt</string>
+    <string name="package_name">com.qualityhunt.app</string>
+    <string name="custom_url_scheme">com.qualityhunt.app</string>
+</resources>
