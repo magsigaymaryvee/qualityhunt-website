@@ -1,0 +1,647 @@
+<title>Quality Hunt Pre-Launch Audit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #EEF0F3;
+    --surface: #FFFFFF;
+    --surface-2: #F5F6F8;
+    --ink: #1B2027;
+    --ink-soft: #5B6472;
+    --ink-faint: #87909C;
+    --line: #DFE2E7;
+    --line-strong: #C4C9D2;
+    --accent: #2C3E66;
+    --accent-soft: #E7EBF3;
+    --critical: #B3261E;
+    --critical-soft: #FBEAE9;
+    --high: #B0570F;
+    --high-soft: #FBEEE2;
+    --medium: #93720A;
+    --medium-soft: #FAF3DC;
+    --low: #2F6C8F;
+    --low-soft: #E7F1F6;
+    --good: #2E7D5B;
+    --good-soft: #E7F5EE;
+    --info: #5B6472;
+    --info-soft: #EEF0F3;
+    --shadow: 0 1px 2px rgba(27,32,39,0.04), 0 8px 24px rgba(27,32,39,0.06);
+    --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171C;
+      --surface: #1B1F26;
+      --surface-2: #20242C;
+      --ink: #E7E9EC;
+      --ink-soft: #A7ADB8;
+      --ink-faint: #767D89;
+      --line: #2B3038;
+      --line-strong: #3A4048;
+      --accent: #8FA6D9;
+      --accent-soft: #232B3D;
+      --critical: #E8776D;
+      --critical-soft: #3A2422;
+      --high: #E3A15D;
+      --high-soft: #3A2E1C;
+      --medium: #D8C066;
+      --medium-soft: #38321C;
+      --low: #7FB3D3;
+      --low-soft: #1E2E36;
+      --good: #7DCBA6;
+      --good-soft: #1D3226;
+      --info: #A7ADB8;
+      --info-soft: #232830;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171C;
+    --surface: #1B1F26;
+    --surface-2: #20242C;
+    --ink: #E7E9EC;
+    --ink-soft: #A7ADB8;
+    --ink-faint: #767D89;
+    --line: #2B3038;
+    --line-strong: #3A4048;
+    --accent: #8FA6D9;
+    --accent-soft: #232B3D;
+    --critical: #E8776D;
+    --critical-soft: #3A2422;
+    --high: #E3A15D;
+    --high-soft: #3A2E1C;
+    --medium: #D8C066;
+    --medium-soft: #38321C;
+    --low: #7FB3D3;
+    --low-soft: #1E2E36;
+    --good: #7DCBA6;
+    --good-soft: #1D3226;
+    --info: #A7ADB8;
+    --info-soft: #232830;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-soft); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px 96px; }
+
+  /* ---------- Cover ---------- */
+  .cover {
+    padding: 56px 0 40px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 40px;
+  }
+  .cover-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .cover-eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--ink-faint); }
+  h1.cover-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(34px, 5vw, 50px);
+    line-height: 1.06;
+    letter-spacing: -0.01em;
+    margin: 0 0 14px;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .cover-sub {
+    font-size: 16px;
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin: 0 0 28px;
+  }
+  .cover-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 20px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .cover-meta dt {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 5px;
+  }
+  .cover-meta dd { margin: 0; font-size: 14px; font-weight: 500; }
+
+  /* ---------- Section headings ---------- */
+  section { margin-bottom: 52px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-faint);
+    flex-shrink: 0;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.005em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0 0 10px;
+    color: var(--ink);
+  }
+  p { margin: 0 0 14px; color: var(--ink-soft); max-width: 68ch; }
+  .lede { font-size: 16px; color: var(--ink); max-width: 66ch; }
+
+  /* ---------- Verdict stamp ---------- */
+  .verdict {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px 28px;
+    box-shadow: var(--shadow);
+    margin-bottom: 40px;
+  }
+  .stamp {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--high);
+    border: 2px solid var(--high);
+    border-radius: 10px;
+    padding: 10px 16px;
+    transform: rotate(-3deg);
+    white-space: nowrap;
+  }
+  .verdict-text h3 { margin-bottom: 4px; }
+  .verdict-text p { margin: 0; font-size: 14px; }
+
+  /* ---------- Scorecard ---------- */
+  .scorecard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .score-cell {
+    background: var(--surface);
+    padding: 18px 18px 16px;
+  }
+  .score-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  .score-num {
+    font-family: var(--font-mono);
+    font-size: 28px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .score-bar { height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; }
+  .score-bar > span { display: block; height: 100%; border-radius: 2px; background: var(--accent); }
+
+  /* ---------- Finding cards ---------- */
+  .finding {
+    display: grid;
+    grid-template-columns: 3px 1fr;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .finding-stripe { background: var(--sev-color); }
+  .finding-body { padding: 18px 22px; }
+  .finding-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .finding-title { font-weight: 600; font-size: 15px; color: var(--ink); }
+  .pill {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--sev-soft);
+    color: var(--sev-color);
+    white-space: nowrap;
+  }
+  .finding p { margin: 0 0 8px; font-size: 13.5px; }
+  .finding p:last-child { margin-bottom: 0; }
+  .finding .kv { font-size: 13px; }
+  .finding .kv b { color: var(--ink); font-weight: 600; }
+  code, .mono {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    background: var(--surface-2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--ink);
+  }
+
+  .finding.sev-high { --sev-color: var(--high); --sev-soft: var(--high-soft); }
+  .finding.sev-medium { --sev-color: var(--medium); --sev-soft: var(--medium-soft); }
+  .finding.sev-low { --sev-color: var(--low); --sev-soft: var(--low-soft); }
+  .finding.sev-info { --sev-color: var(--info); --sev-soft: var(--info-soft); }
+  .finding.sev-good { --sev-color: var(--good); --sev-soft: var(--good-soft); }
+
+  /* ---------- Tables ---------- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--surface); min-width: 560px; }
+  th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    padding: 12px 16px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink-soft); }
+  tr:last-child td { border-bottom: none; }
+  td.status-pass { color: var(--good); font-weight: 600; }
+  td.status-fail { color: var(--critical); font-weight: 600; }
+  td.status-nv { color: var(--ink-faint); font-style: italic; }
+  td b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Checklist / roadmap ---------- */
+  .roadmap { display: flex; flex-direction: column; gap: 0; border-left: 2px solid var(--line); margin-left: 8px; }
+  .road-stage { position: relative; padding: 0 0 32px 28px; }
+  .road-stage:last-child { padding-bottom: 4px; }
+  .road-stage::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--stage-color);
+  }
+  .road-stage.p0 { --stage-color: var(--critical); }
+  .road-stage.p1 { --stage-color: var(--high); }
+  .road-stage.p2 { --stage-color: var(--medium); }
+  .road-stage.p3 { --stage-color: var(--low); }
+  .road-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--stage-color);
+    margin-bottom: 4px;
+  }
+  .road-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+  .road-items { margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: 13.5px; }
+  .road-items li { margin-bottom: 4px; }
+  .road-empty { color: var(--ink-faint); font-size: 13.5px; font-style: italic; }
+
+  /* ---------- Method note ---------- */
+  .method {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 22px;
+    font-size: 13.5px;
+  }
+  .method p { font-size: 13.5px; margin-bottom: 8px; }
+  .method p:last-child { margin-bottom: 0; }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 0 16px 64px; }
+    .cover { padding: 40px 0 32px; }
+    .verdict { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="cover">
+    <div class="cover-eyebrow">QA &amp; Security Audit<span class="dot"></span>Pre-launch review</div>
+    <h1 class="cover-title">Quality Hunt — Pre-Launch Audit</h1>
+    <p class="cover-sub">A scoped review of the admin CMS and public storefront ahead of deploying to Vercel — authorization, data exposure, XSS, uploads, responsive layout, and error handling, tested against the running local build.</p>
+    <dl class="cover-meta">
+      <div><dt>Site</dt><dd>Quality Hunt (pinterest-website)</dd></div>
+      <div><dt>Environment</dt><dd>Local dev (pre-Vercel)</dd></div>
+      <div><dt>Surfaces</dt><dd>Admin CMS + public site</dd></div>
+      <div><dt>Architecture</dt><dd>Single-owner, no client accounts</dd></div>
+    </dl>
+  </div>
+
+  <div class="verdict">
+    <div class="stamp">Go — with fixes</div>
+    <div class="verdict-text">
+      <h3>Safe to launch once the login is rate-limited</h3>
+      <p>No critical or data-exposing bugs found. Authorization, XSS handling, and secret handling are solid. One High item (unlimited passcode attempts) is worth closing before launch; the rest can follow shortly after.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="section-head"><span class="section-num">01</span><h2>Scorecard</h2></div>
+    <p class="lede">Scores reflect what was actually tested against the live local build — see the method note at the end for what wasn't covered.</p>
+    <div class="scorecard">
+      <div class="score-cell"><div class="score-label">Public site</div><div class="score-num">88</div><div class="score-bar"><span style="width:88%"></span></div></div>
+      <div class="score-cell"><div class="score-label">Admin CMS</div><div class="score-num">85</div><div class="score-bar"><span style="width:85%"></span></div></div>
+      <div class="score-cell"><div class="score-label">Security</div><div class="score-num">78</div><div class="score-bar"><span style="width:78%"></span></div></div>
+      <div class="score-cell"><div class="score-label">UX</div><div class="score-num">85</div><div class="score-bar"><span style="width:85%"></span></div></div>
+      <div class="score-cell"><div class="score-label">Accessibility</div><div class="score-num">78<sup style="font-size:11px;color:var(--ink-faint);">†</sup></div><div class="score-bar"><span style="width:78%"></span></div></div>
+      <div class="score-cell"><div class="score-label">Performance</div><div class="score-num">80<sup style="font-size:11px;color:var(--ink-faint);">†</sup></div><div class="score-bar"><span style="width:80%"></span></div></div>
+      <div class="score-cell"><div class="score-label">Reliability</div><div class="score-num">85</div><div class="score-bar"><span style="width:85%"></span></div></div>
+    </div>
+    <p style="font-size:12.5px; margin-top:10px;">† Accessibility and performance were spot-checked, not run through a full axe/Lighthouse pass — see §07.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="section-num">02</span><h2>What was actually tested</h2></div>
+    <p class="lede">This site is a single-owner CMS (one admin, no client sign-in, no payments on-site — purchases happen on Amazon). Whole sections of a generic QA template don't apply here; rather than pad the report with them, they're listed once in §07. What follows is real findings from live testing and source review, not a checklist filled in by assumption.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="section-num">03</span><h2>High priority</h2></div>
+
+    <div class="finding sev-high">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">Admin login has no rate limiting</span><span class="pill">High</span></div>
+        <p><b>Where:</b> <code>app/api/admin/login/route.ts</code> — confirmed by code review; no rate-limit or lockout logic exists anywhere in the project.</p>
+        <p><b>Why it matters:</b> the passcode is the single gate protecting the entire admin — every board and product, and by extension everything shown on the public site. Nothing currently stops unlimited automated guesses against it.</p>
+        <p><b>Recommended fix:</b> add a simple per-IP limiter (e.g. 5 attempts / 15 min) in front of the login route — Vercel KV or Upstash Redis both work well on Vercel's free tier. The sibling Digitale project already has this exact pattern on its chat endpoint; it can be ported directly.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="section-num">04</span><h2>Medium priority</h2></div>
+
+    <div class="finding sev-medium">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">Sessions can't be individually revoked</span><span class="pill">Medium</span></div>
+        <p><b>Where:</b> <code>lib/admin-auth.ts</code> — the session cookie is a constant HMAC of a fixed string, not a per-login token.</p>
+        <p><b>Why it matters:</b> if a session cookie is ever copied off a device, there's no way to invalidate just that copy — logout only deletes the cookie in the browser that clicks it. The only true revocation is rotating <code>ADMIN_SESSION_SECRET</code>, which also logs out the real owner.</p>
+        <p><b>Recommended fix:</b> acceptable as-is for a single-owner site; worth revisiting only if the admin is ever used from a shared or public device.</p>
+      </div>
+    </div>
+
+    <div class="finding sev-medium">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">No custom 404 or error page</span><span class="pill">Medium</span></div>
+        <p><b>Where:</b> confirmed live at <code>/products/nonexistent-slug-xyz</code> — correct <code>404</code> status, but Next.js's bare default page (no header, no branding, no link back into the site).</p>
+        <p><b>Recommended fix:</b> add <code>app/not-found.tsx</code> styled with the site's own header/footer, so a mistyped or stale link doesn't dead-end.</p>
+      </div>
+    </div>
+
+    <div class="finding sev-medium">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">No baseline security headers</span><span class="pill">Medium</span></div>
+        <p><b>Where:</b> <code>next.config.ts</code> — no <code>headers()</code> configured.</p>
+        <p><b>Why it matters:</b> no <code>X-Frame-Options</code>/<code>frame-ancestors</code> means the admin passcode page could be embedded in an invisible iframe on another site (clickjacking); no baseline CSP either.</p>
+        <p><b>Recommended fix:</b> add a <code>headers()</code> block: <code>X-Frame-Options: DENY</code>, <code>X-Content-Type-Options: nosniff</code>, <code>Referrer-Policy: strict-origin-when-cross-origin</code>, and a basic CSP once the deployed origin is known.</p>
+      </div>
+    </div>
+
+    <div class="finding sev-medium">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">No robots.txt or sitemap</span><span class="pill">Medium</span></div>
+        <p>Not a bug, but worth having before real traffic — Next.js supports both as simple route files (<code>app/robots.ts</code>, <code>app/sitemap.ts</code>).</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="section-num">05</span><h2>Low &amp; informational</h2></div>
+
+    <div class="finding sev-low">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">Leftover test products still live</span><span class="pill">Low</span></div>
+        <p><code>test</code>, <code>test101</code>, <code>test 102</code>, <code>TEST carousel-in-new-product</code>, and <code>Auto-Edit Flow Test Product</code> are still in the database — one is hidden, the rest are still publicly visible on the Cropped Jacket board. Hide or delete before launch.</p>
+      </div>
+    </div>
+
+    <div class="finding sev-info">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">Link fields accept any string, including <code>javascript:</code></span><span class="pill">Info</span></div>
+        <p>Buy/reviews/video URL fields only show a soft "doesn't look valid" warning — they never block saving. Since only the trusted owner can set these, this is self-XSS at most, not externally exploitable.</p>
+      </div>
+    </div>
+
+    <div class="finding sev-info">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">Uploaded file type is trusted from the browser, not sniffed</span><span class="pill">Info</span></div>
+        <p>Image/video type checks read the browser-reported MIME type, not the file's actual bytes. Low practical risk here since the allowed set is limited to safe raster/video formats — no SVG, no HTML.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="section-num">06</span><h2>What held up well</h2></div>
+    <p class="lede">Confirmed by live testing against the running app, not just reading the code.</p>
+
+    <div class="finding sev-good">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">Every admin API route rejects unauthenticated requests — verified live</span><span class="pill">Pass</span></div>
+        <p>Called <code>GET/POST/DELETE</code> on the products and boards APIs with the session cookie stripped out: all four returned <code>401</code>. Enforced server-side in each route, not just hidden in the UI.</p>
+      </div>
+    </div>
+
+    <div class="finding sev-good">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">Stored XSS attempt rendered as inert text — verified live</span><span class="pill">Pass</span></div>
+        <p>Created a real product with <code>&lt;script&gt;window.__xss_fired=true&lt;/script&gt;&lt;img src=x onerror=...&gt;</code> in its name, description, and notes, then loaded its public page. The payload appeared as plain visible text — neither script fired. No <code>dangerouslySetInnerHTML</code> exists anywhere in the codebase. Test product deleted afterward.</p>
+      </div>
+    </div>
+
+    <div class="finding sev-good">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">Service-role key never reaches the browser</span><span class="pill">Pass</span></div>
+        <p>Every file touching <code>SUPABASE_SERVICE_ROLE_KEY</code> is guarded with <code>import "server-only"</code>. No Supabase anon key is used anywhere, so there's no direct client-to-database path to probe at all.</p>
+      </div>
+    </div>
+
+    <div class="finding sev-good">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">Cookie flags and passcode comparison are correct</span><span class="pill">Pass</span></div>
+        <p><code>httpOnly</code>, <code>secure</code> in production, <code>sameSite: lax</code> — confirmed live that JavaScript cannot read or overwrite the cookie. Passcode comparison uses <code>timingSafeEqual</code>, resistant to timing attacks.</p>
+      </div>
+    </div>
+
+    <div class="finding sev-good">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">Draft/scheduled content is genuinely hidden from the public site</span><span class="pill">Pass</span></div>
+        <p>Both public queries (board page, product page) filter on <code>publish_at</code>; a direct link to a draft or not-yet-scheduled product returns a real 404, not a preview.</p>
+      </div>
+    </div>
+
+    <div class="finding sev-good">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">No secrets committed to git</span><span class="pill">Pass</span></div>
+        <p><code>.env.local</code> is gitignored with no history of ever being committed; <code>.env.example</code> holds only placeholders.</p>
+      </div>
+    </div>
+
+    <div class="finding sev-good">
+      <div class="finding-stripe"></div>
+      <div class="finding-body">
+        <div class="finding-top"><span class="finding-title">Mobile layout holds up</span><span class="pill">Pass</span></div>
+        <p>Checked a product page at 375px: no horizontal scroll, sticky "Shop this" bar and affiliate disclosure both render correctly.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="section-num">07</span><h2>Coverage</h2></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Area</th><th>Coverage</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><b>Authorization</b></td><td class="status-pass">Tested live</td><td>Unauthenticated API calls, page redirects — see §06.</td></tr>
+          <tr><td><b>XSS / stored content</b></td><td class="status-pass">Tested live</td><td>Real payload created, rendered, verified inert, deleted.</td></tr>
+          <tr><td><b>Secrets exposure</b></td><td class="status-pass">Tested live</td><td>Bundle + git history checked.</td></tr>
+          <tr><td><b>Upload validation</b></td><td class="status-pass">Code-reviewed</td><td>Type + size enforced server-side, double-enforced at the Supabase bucket for video.</td></tr>
+          <tr><td><b>404 / error handling</b></td><td class="status-pass">Tested live</td><td>Correct status code; page itself unstyled (§04).</td></tr>
+          <tr><td><b>Responsive layout</b></td><td class="status-pass">Tested live</td><td>375px width only — no tablet pass.</td></tr>
+          <tr><td><b>Rate limiting</b></td><td class="status-fail">Confirmed absent</td><td>See §03.</td></tr>
+          <tr><td>Client accounts / login</td><td class="status-nv">N/A</td><td>No visitor accounts exist — purchases route to Amazon.</td></tr>
+          <tr><td>Client-to-client authorization</td><td class="status-nv">N/A</td><td>Single-owner site; no multi-tenant data.</td></tr>
+          <tr><td>Payment flow</td><td class="status-nv">N/A</td><td>No checkout on-site.</td></tr>
+          <tr><td>Cross-browser (Safari, Firefox)</td><td class="status-nv">Not verified</td><td>Only tested in one Chromium-based browser here.</td></tr>
+          <tr><td>Production/Vercel environment</td><td class="status-nv">Not verified</td><td>All testing ran against the local dev server.</td></tr>
+          <tr><td>Full accessibility audit</td><td class="status-nv">Spot-checked only</td><td>Labels, alt text, and focus states follow a consistent pattern by code review; no axe scan or screen-reader pass run.</td></tr>
+          <tr><td>Load / stress testing</td><td class="status-nv">Out of scope</td><td>Excluded per the review's safety rules.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="section-num">08</span><h2>Fix roadmap</h2></div>
+    <div class="roadmap">
+      <div class="road-stage p0">
+        <div class="road-tag">P0 · Fix immediately</div>
+        <div class="road-title">Nothing found at this level</div>
+        <p class="road-empty">No critical, data-exposing, or catastrophic issues turned up.</p>
+      </div>
+      <div class="road-stage p1">
+        <div class="road-tag">P1 · Before launch</div>
+        <div class="road-title">Close the one real gap</div>
+        <ul class="road-items">
+          <li>Rate-limit the admin login endpoint</li>
+        </ul>
+      </div>
+      <div class="road-stage p2">
+        <div class="road-tag">P2 · Soon after</div>
+        <div class="road-title">Harden and tidy</div>
+        <ul class="road-items">
+          <li>Add a branded <code>not-found.tsx</code></li>
+          <li>Add baseline security headers</li>
+          <li>Add <code>robots.ts</code> / <code>sitemap.ts</code></li>
+          <li>Hide or delete the leftover test products</li>
+        </ul>
+      </div>
+      <div class="road-stage p3">
+        <div class="road-tag">P3 · Future</div>
+        <div class="road-title">Nice to have</div>
+        <ul class="road-items">
+          <li>Per-login revocable sessions, if the admin is ever used on a shared device</li>
+          <li>Sniff uploaded file content rather than trusting the browser's MIME type</li>
+          <li>A full axe/Lighthouse pass once traffic patterns are known</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><span class="section-num">09</span><h2>Method</h2></div>
+    <div class="method">
+      <p>Testing combined source review (auth, API routes, upload validation, git history) with live testing against the running local build: unauthenticated API calls, a real stored-XSS attempt (created and deleted as test data), a bad-slug 404, and a 375px mobile pass. No destructive actions were taken, no real user data exists on this single-owner site, and no load/stress/brute-force testing was performed.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Quality Hunt — Pre-Launch Audit</span>
+    <span>Reviewed against local build, pre-Vercel deploy</span>
+  </footer>
+
+</div>

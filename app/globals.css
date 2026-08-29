@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/* Quality Hunt palette, pulled straight from the real logo (public/logo.png):
+   background #DBD2BC (warm khaki) and ink #514B2F (olive). Everything below
+   is built from those two colors — lighter/darker steps of the same warm
+   khaki-olive family, kept light by default per the brand. Token names match
+   the previous palette so existing class names keep working. */
+:root {
+  --paper: #ede6d4;
+  --paper-2: #fbf8f0;
+  --ink: #2a2617;
+  --ink-soft: #6b644e;
+  --taupe: #9c9377;
+  --line: #ddd3b8;
+  --oxblood: #5b5730;
+  --oxblood-soft: #5b5730;
+  --forest: #4a4527;
+  --forest-soft: #b9b08c;
+  --danger: #a24a3a;
+  --focus: #5b5730;
+  /* Fixed (non-theme-adaptive) pairing for anything drawn on top of
+     --forest — buttons, the sidebar, the sign-in screen. --forest stays
+     dark in both light and dark mode by design, but --paper-2 flips from
+     cream to near-black — pairing them (bg-forest + text-paper-2) goes
+     dark-on-dark in dark mode. --on-forest never changes, so it stays
+     readable regardless of the viewer's theme. */
+  --on-forest: #fbf8f0;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-taupe: var(--taupe);
+  --color-line: var(--line);
+  --color-oxblood: var(--oxblood);
+  --color-oxblood-soft: var(--oxblood-soft);
+  --color-forest: var(--forest);
+  --color-forest-soft: var(--forest-soft);
+  --color-danger: var(--danger);
+  --color-focus: var(--focus);
+  --color-on-forest: var(--on-forest);
+  --font-serif: var(--font-instrument-serif);
+  --font-sans: var(--font-dm-sans);
+}
+
+/* Light is the only mode, on purpose — the site always shows the palette
+   above regardless of the visitor's system/browser dark mode setting. (A
+   dark variant lived here before; removed because it kept surprising the
+   owner by kicking in based on their device, not a deliberate choice.) */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Never let a form control render below 16px on phones — iOS Safari zooms
+   the whole page in on focus when it does. */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+::selection {
+  background: var(--oxblood);
+  color: var(--paper-2);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* Scrollable areas (e.g. the product photo carousel) that keep native
+   touch/trackpad scrolling but hide the visible scrollbar track. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
