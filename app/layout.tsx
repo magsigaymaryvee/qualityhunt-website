@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, DM_Sans } from "next/font/google";
 import { site } from "@/lib/site";
+import RegisterServiceWorker from "@/app/components/RegisterServiceWorker";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#5b5730",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -34,7 +36,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${instrumentSerif.variable} ${dmSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-paper text-ink">{children}</body>
+      <body className="min-h-full flex flex-col bg-paper text-ink">
+        <RegisterServiceWorker />
+        {children}
+      </body>
     </html>
   );
 }
