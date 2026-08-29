@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/app/components/SiteHeader";
 import SiteFooter from "@/app/components/SiteFooter";
 import ProductCard from "@/app/components/ProductCard";
+import ShareButton from "@/app/components/ShareButton";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import type { Board, Product } from "@/lib/types";
 import type { Metadata } from "next";
@@ -84,12 +85,15 @@ export default async function BoardPage({
       <SiteHeader />
       <main className="flex-1">
         <section className="mx-auto max-w-6xl px-4 pb-5 pt-8 sm:px-8 sm:pt-14 lg:px-14 lg:pb-7 lg:pt-16">
-          <Link
-            href="/"
-            className="inline-flex min-h-11 items-center text-sm font-medium text-ink-soft hover:text-oxblood"
-          >
-            ← All boards
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link
+              href="/"
+              className="inline-flex min-h-11 items-center text-sm font-medium text-ink-soft hover:text-oxblood"
+            >
+              ← All boards
+            </Link>
+            <ShareButton title={board.title} image={board.cover_image_url} />
+          </div>
           <div className="mt-2 lg:flex lg:items-end lg:justify-between lg:gap-10">
             <div className="max-w-2xl">
               {board.kicker && (
