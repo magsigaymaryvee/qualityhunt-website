@@ -45,7 +45,11 @@ export default function NewProductMediaEditor({
   // uploading — same tool the cover photo uses. A stable id per queued file
   // (not just its index) so ImageCropModal fully remounts, and resets its
   // pan/zoom state, between photos instead of reusing one instance.
-  const [cropQueue, setCropQueue] = useState<{ id: string; file: File }[]>([]);
+  // replaceId is set when re-cropping an already-staged photo (clicked its
+  // thumbnail) rather than adding a brand new one.
+  const [cropQueue, setCropQueue] = useState<
+    { id: string; file: File; replaceId?: string }[]
+  >([]);
   const [uploadingCrop, setUploadingCrop] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -79,7 +83,23 @@ export default function NewProductMediaEditor({
     if (accepted.length > 0) setCropQueue((q) => [...q, ...accepted]);
   }
 
-  async function uploadCroppedImage(blob: Blob) {
+  // A photo you already staged, re-opened for a different crop — fetches
+  // it back as a file (its "original" from the crop tool's point of view;
+  // this project doesn't keep the pre-crop source around) and queues it
+  // the same as a fresh upload, just tagged with which item to replace.
+  async function startRecrop(item: StagedMedia) {
+    setError(null);
+    try {
+      const res = await fetch(item.url);
+      const blob = await res.blob();
+      const file = new File([blob], "recrop.jpg", { type: blob.type || "image/jpeg" });
+      setCropQueue((q) => [...q, { id: crypto.randomUUID(), file, replaceId: item.localId }]);
+    } catch {
+      setError("Couldn't load that photo to re-crop it. Try again.");
+    }
+  }
+
+  async function uploadCroppedImage(blob: Blob, replaceId?: string) {
     setUploadingCrop(true);
     try {
       const body = new FormData();
@@ -91,6 +111,10 @@ export default function NewProductMediaEditor({
       });
       if (!uploaded.ok) {
         setError((prev) => (prev ? `${prev} · ${uploaded.error}` : uploaded.error));
+      } else if (replaceId) {
+        onChange(
+          items.map((i) => (i.localId === replaceId ? { ...i, url: uploaded.data.url } : i))
+        );
       } else {
         addItem("image", uploaded.data.url);
       }
@@ -234,8 +258,19 @@ export default function NewProductMediaEditor({
             >
               <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-sm bg-line">
                 {item.media_type === "image" ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- admin preview of an uploaded photo URL.
-                  <img src={item.url} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => startRecrop(item)}
+                    aria-label="Adjust crop"
+                    title="Move and scale to crop"
+                    className="group relative block h-full w-full"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- admin preview of an uploaded photo URL. */}
+                    <img src={item.url} alt="" className="h-full w-full object-cover" />
+                    <span className="absolute inset-0 flex items-center justify-center bg-ink/0 text-transparent transition group-hover:bg-ink/40 group-hover:text-paper">
+                      <PencilIcon />
+                    </span>
+                  </button>
                 ) : (
                   <>
                     <video
@@ -370,11 +405,30 @@ export default function NewProductMediaEditor({
           aspect={CAROUSEL_ASPECT}
           onCancel={() => setCropQueue((q) => q.slice(1))}
           onCropped={async (blob) => {
-            await uploadCroppedImage(blob);
+            await uploadCroppedImage(blob, cropQueue[0].replaceId);
             setCropQueue((q) => q.slice(1));
           }}
         />
       )}
     </div>
+  );
+}
+
+function PencilIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M14.5 5.5 18.5 9.5 8 20H4v-4Z" />
+      <path d="M13 7 17 11" />
+    </svg>
   );
 }

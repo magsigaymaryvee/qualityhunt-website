@@ -20,10 +20,11 @@ export async function PATCH(request: Request, context: { params: Promise<Params>
     return Response.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { title, caption, position } = (body ?? {}) as {
+  const { title, caption, position, url } = (body ?? {}) as {
     title?: unknown;
     caption?: unknown;
     position?: unknown;
+    url?: unknown;
   };
   const patch: Record<string, unknown> = {};
 
@@ -38,6 +39,14 @@ export async function PATCH(request: Request, context: { params: Promise<Params>
       return Response.json({ error: "position must be a number." }, { status: 400 });
     }
     patch.position = position;
+  }
+  if (url !== undefined) {
+    // Lets re-cropping an already-uploaded photo replace it in place,
+    // instead of only ever being settable at creation time.
+    if (typeof url !== "string" || !url.trim()) {
+      return Response.json({ error: "url must be a non-empty string." }, { status: 400 });
+    }
+    patch.url = url.trim();
   }
 
   try {
