@@ -6,9 +6,14 @@ import { fetchJson } from "@/lib/fetch-json";
 import { isLikelyValidUrl } from "@/lib/url-check";
 import ConfirmButton from "@/app/admin/ConfirmButton";
 import MediaCaptionField from "@/app/admin/MediaCaptionField";
+import ImageCropModal from "@/app/admin/ImageCropModal";
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+// Same fixed shape the carousel actually displays tiles in (see
+// MediaCarousel's TILE_ASPECT) — cropping to anything else would just mean
+// object-cover silently re-cropping it again on the public page.
+const CAROUSEL_ASPECT = "2/3";
 
 // Manages the mixed photo/video carousel for one product — separate from
 // the product's single cover photo and single "main" video field. Only
@@ -20,6 +25,12 @@ export default function ProductMediaEditor({ productId }: { productId: string })
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [linkValue, setLinkValue] = useState("");
   const [addingLink, setAddingLink] = useState(false);
+  // Photos go through "move and scale to crop" one at a time before
+  // uploading — same tool the cover photo uses. A stable id per queued file
+  // (not just its index) so ImageCropModal fully remounts, and resets its
+  // pan/zoom state, between photos instead of reusing one instance.
+  const [cropQueue, setCropQueue] = useState<{ id: string; file: File }[]>([]);
+  const [uploadingCrop, setUploadingCrop] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -52,47 +63,49 @@ export default function ProductMediaEditor({ productId }: { productId: string })
     });
   }
 
-  // Uploads and adds every selected file, one at a time (so a per-file
-  // failure — e.g. one photo over the size cap — doesn't lose the rest of
-  // the batch), then refreshes the list once at the end.
-  async function onImagesChosen(e: React.ChangeEvent<HTMLInputElement>) {
+  function onImagesChosen(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
     e.target.value = "";
     if (files.length === 0) return;
 
     setError(null);
-    setProgress({ done: 0, total: files.length });
     const failures: string[] = [];
-
+    const accepted: { id: string; file: File }[] = [];
     for (const file of files) {
       if (file.size > MAX_IMAGE_BYTES) {
         failures.push(`${file.name}: too large (over 4MB)`);
-        setProgress((p) => (p ? { ...p, done: p.done + 1 } : p));
         continue;
       }
-      try {
-        const body = new FormData();
-        body.append("file", file);
-        body.append("kind", "product-image");
-        const uploaded = await fetchJson<{ url: string }>("/api/admin/upload", {
-          method: "POST",
-          body,
-        });
-        if (!uploaded.ok) {
-          failures.push(`${file.name}: ${uploaded.error}`);
-        } else {
-          const added = await addMediaRow("image", uploaded.data.url);
-          if (!added.ok) failures.push(`${file.name}: ${added.error}`);
-        }
-      } catch {
-        failures.push(`${file.name}: upload failed`);
-      }
-      setProgress((p) => (p ? { ...p, done: p.done + 1 } : p));
+      accepted.push({ id: crypto.randomUUID(), file });
     }
-
-    setProgress(null);
     if (failures.length > 0) setError(failures.join(" · "));
-    await load();
+    // Queued rather than uploaded directly — each goes through "move and
+    // scale to crop" first, one at a time.
+    if (accepted.length > 0) setCropQueue((q) => [...q, ...accepted]);
+  }
+
+  async function uploadCroppedImage(blob: Blob) {
+    setUploadingCrop(true);
+    try {
+      const body = new FormData();
+      body.append("file", blob, "photo.jpg");
+      body.append("kind", "product-image");
+      const uploaded = await fetchJson<{ url: string }>("/api/admin/upload", {
+        method: "POST",
+        body,
+      });
+      if (!uploaded.ok) {
+        setError((prev) => (prev ? `${prev} · ${uploaded.error}` : uploaded.error));
+      } else {
+        const added = await addMediaRow("image", uploaded.data.url);
+        if (!added.ok) setError((prev) => (prev ? `${prev} · ${added.error}` : added.error));
+      }
+    } catch {
+      setError((prev) => (prev ? `${prev} · upload failed` : "upload failed"));
+    } finally {
+      setUploadingCrop(false);
+      await load();
+    }
   }
 
   async function onVideosChosen(e: React.ChangeEvent<HTMLInputElement>) {
@@ -238,6 +251,15 @@ export default function ProductMediaEditor({ productId }: { productId: string })
           Uploading {progress.done} of {progress.total}…
         </p>
       )}
+      {uploadingCrop ? (
+        <p className="font-sans text-xs text-ink-soft">Uploading…</p>
+      ) : (
+        cropQueue.length > 1 && (
+          <p className="font-sans text-xs text-ink-soft">
+            {cropQueue.length} photos to crop — one at a time.
+          </p>
+        )
+      )}
 
       {media === null ? (
         <p className="font-sans text-xs text-taupe">Loading…</p>
@@ -321,7 +343,7 @@ export default function ProductMediaEditor({ productId }: { productId: string })
           <button
             type="button"
             onClick={() => imageInputRef.current?.click()}
-            disabled={progress !== null}
+            disabled={progress !== null || cropQueue.length > 0}
             className="flex flex-col items-center justify-center gap-1 rounded-sm border border-dashed border-line py-4 font-sans text-xs uppercase tracking-[0.08em] text-ink-soft transition hover:border-oxblood hover:text-oxblood disabled:opacity-50"
           >
             <span className="text-lg leading-none">+</span>
@@ -379,6 +401,19 @@ export default function ProductMediaEditor({ productId }: { productId: string })
           </button>
         </div>
       </div>
+
+      {cropQueue.length > 0 && (
+        <ImageCropModal
+          key={cropQueue[0].id}
+          file={cropQueue[0].file}
+          aspect={CAROUSEL_ASPECT}
+          onCancel={() => setCropQueue((q) => q.slice(1))}
+          onCropped={async (blob) => {
+            await uploadCroppedImage(blob);
+            setCropQueue((q) => q.slice(1));
+          }}
+        />
+      )}
     </div>
   );
 }
